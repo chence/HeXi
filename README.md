@@ -1,23 +1,21 @@
-DolrPHP官网：http://www.dolrphp.com
+## What's HeXi
 
-DolrPHP官方交流群：234061453 [请加群以获取最新变动信息]
+HeXi是一款采用MVC结构设计，Action流操作方式的轻量级PHP开发框架
 
-简介
+## Description
 
-DolrPHP是一个免费开源的轻量级PHP框架，完全采用面向对象的设计思想，基于MVC的设计模式设计开发。具有部署和应用极为简单、效率
+HeXi是开源的PHP轻量级框架。现在学习和工作之余把一些习惯和常用类库整合后组成这个框架。框架还处于补充和测试的阶段，
+使用实例就是个人小站[http://hexiaz.com](http://hexiaz.com)，并测试运行中考虑和实现各种功能。
 
-高、速度快，扩展性和可维护性高等特点。 DolrPHP框架包括单入口文件、MVC模式、目录组织结构、类自动加载、强大基础类、URL处理、数据验证、输入处理、错误处理、缓存机制
+目前的版本约为0.5，已经完成了核心结构的构造，主要的类库如控制器、数据库操作等都已经完成。。。不嫌弃质量问题，尽可以下载学习，
+欢迎大家都提意见建议，我继续学习完善！
 
-、扩展类等功能,使用简单快捷，不用把过多的时间花在阅读开发手册上，加上友好实用的调试模式，让你真正体验到开发的乐趣.
+## Author
 
-目前3.0版正策划中。。。 欢迎大家提意见！反馈地址：http://www.dolrphp.com/feedback 或者mail:joy@joychao.cc
+作者：傅小黑.
 
-作者：安正超
+网站：[http://hexiaz.com](http://hexiaz.com).
 
-Q Q：44294631
+QQ：772881987.
 
-Email:joy@joychao.cc
-
-Blog:http://www.joychao.cc
-
-Sina:http://weibo.com/joychaocc
+Email:fuxiaohei#hexiaz.com (#=@)
