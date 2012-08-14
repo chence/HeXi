@@ -175,6 +175,17 @@ class HeXiView {
         return $this;
     }
 
+    /**
+     * 添加Action数据到视图数据
+     * @param array $map
+     * @return HeXiView
+     */
+    public function assign_action($map) {
+        foreach ($map as $name=> $assign) {
+            $this->assign($name, $GLOBALS['action']['data'][$assign]);
+        }
+        return $this;
+    }
 
     /**
      * 私有方法
@@ -212,7 +223,7 @@ class HeXiView {
         #获取视图文件
         $viewFile = $this->path . $file . '.' . $this->viewExt;
         if (!is_file($viewFile)) {
-            throw new HeXiViewException('Template file "' . $file.'.'.$this->viewExt . '" is lost !');
+            throw new HeXiViewException('Template file "' . $file . '.' . $this->viewExt . '" is lost !');
         }
         #最终执行文件先确定为视图文件自己
         $finalFile = $viewFile;
@@ -225,12 +236,12 @@ class HeXiView {
                 $string = HeXiViewCompiler::compile($string);
                 $string .= $this->compileLog();
                 file_put_contents($compileFile, $string);
-                if(HEXI_DEBUG){
-                    HeXiLogger::write('View "'.$file.'.'.$this->viewExt.'" compiled',__METHOD__,__FILE__,__LINE__);
+                if (HEXI_DEBUG) {
+                    HeXiLogger::write('View "' . $file . '.' . $this->viewExt . '" compiled', __METHOD__, __FILE__, __LINE__);
                 }
-            }else{
-                if(HEXI_DEBUG){
-                    HeXiLogger::write('View "'.$file.'.'.$this->viewExt.'" compiling cached',__METHOD__,__FILE__,__LINE__);
+            } else {
+                if (HEXI_DEBUG) {
+                    HeXiLogger::write('View "' . $file . '.' . $this->viewExt . '" compiling cached', __METHOD__, __FILE__, __LINE__);
                 }
             }
             #编译了，把最终执行文件确定为编译后文件

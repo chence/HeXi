@@ -19,11 +19,12 @@ class HeXiActionController extends HeXiController {
      * 添加Action
      * @param string $name 称呼
      * @param string $method 方法
-     * @param array $args 参数
      * @return HeXiActionController
      */
-    protected function _call($name, $method, $args = array()) {
+    protected function _call($name, $method) {
         $GLOBALS['action']['list'][$name]['method'] = $method;
+        $args = func_get_args();
+        $args = array_slice($args, 2);
         $GLOBALS['action']['list'][$name]['args'] = $args;
         return $this;
     }
@@ -32,11 +33,12 @@ class HeXiActionController extends HeXiController {
      * 注入Action
      * @param string $name
      * @param string $method
-     * @param array $args
      * @return HeXiActionController
      */
-    protected function _inject($name, $method, $args = array()) {
+    protected function _inject($name, $method) {
         $GLOBALS['action']['inject'][$name]['method'] = $method;
+        $args = func_get_args();
+        $args = array_slice($args, 2);
         $GLOBALS['action']['inject'][$name]['args'] = $args;
         return $this;
     }
@@ -105,6 +107,10 @@ class HeXiActionController extends HeXiController {
     protected function _direct($name, $method, $args = array()) {
         #分析和获取调用的对象
         $methods = explode('->', $method);
+        if ($methods[0] == 'controller') {
+            #获取本体实例
+            $object = $this;
+        }
         if ($methods[0] == 'View') {
             #获取视图
             $object = HeXiView::instance();
@@ -144,11 +150,12 @@ class HeXiActionController extends HeXiController {
     /**
      * 最终操作，当Action标记为停止后处理
      * @param string $method
-     * @param array $args
      * @return HeXiActionController
      */
-    protected function _final($method, $args = array()) {
+    protected function _final($method) {
         $GLOBALS['action']['final']['method'] = $method;
+        $args = func_get_args();
+        $args = array_slice($args, 2);
         $GLOBALS['action']['final']['args'] = $args;
         return $this;
     }

@@ -10,11 +10,12 @@ class HeXiActionModel extends HeXiModel {
      * 注入Action
      * @param string $name
      * @param string $method
-     * @param array $args
      * @return HeXiActionModel
      */
-    protected function _inject($name, $method, $args = array()) {
+    protected function _inject($name, $method) {
         $GLOBALS['action']['inject'][$name]['method'] = $method;
+        $args = func_get_args();
+        $args = array_slice($args, 2);
         $GLOBALS['action']['inject'][$name]['args'] = $args;
         return $this;
     }
@@ -38,14 +39,16 @@ class HeXiActionModel extends HeXiModel {
         return $this;
     }
 
+
     /**
-     * 最终调用Action
+     * 最终操作，当Action标记为停止后处理
      * @param string $method
-     * @param array $args
      * @return HeXiActionModel
      */
-    protected function _final($method, $args = array()) {
+    protected function _final($method) {
         $GLOBALS['action']['final']['method'] = $method;
+        $args = func_get_args();
+        $args = array_slice($args, 2);
         $GLOBALS['action']['final']['args'] = $args;
         return $this;
     }
