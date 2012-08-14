@@ -4,29 +4,33 @@
  * @copyright 12-8-14 fuxiaohei
  *
  */
-class action extends hexi{
+abstract class action extends hexi {
 
-    protected function _call(){
-
-    }
-
-    protected function _invoke(){
+    protected function _call() {
 
     }
 
-    protected function _end_action(){
+    protected function _invoke() {
 
     }
 
-    protected function _final(){
+    protected function _end_action() {
 
     }
 
-    protected function _inject(){
+    protected function _final() {
 
     }
 
-    protected function _remove(){
+    protected function _inject() {
+
+    }
+
+    protected function _remove() {
+
+    }
+
+    protected function _check() {
 
     }
 }

@@ -12,8 +12,25 @@ class view {
 
     protected $compile_path;
 
-    public static function init() {
+    private static $view;
 
+    /**
+     * @static
+     * @return view
+     */
+    public static function init() {
+        if (!self::$view instanceof view) {
+            self::$view = new view();
+        }
+        return self::$view;
+    }
+
+    private function __construct() {
+
+    }
+
+    public function _clone() {
+        throw new Exception('view不能克隆');
     }
 
     public function render($file) {
