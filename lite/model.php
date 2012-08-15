@@ -5,25 +5,7 @@
  * @copyright 12-8-14 fuxiaohei
  *
  */
-class model extends hexi {
-
-    /**
-     * 模型类，一个表一个模型
-     * @var array
-     */
-    private static $models = array();
-
-    /**
-     * @static
-     * @param string $table
-     * @return model
-     */
-    public static function factory($table) {
-        if (!self::$models[$table] instanceof model) {
-            self::$models[$table] = new model($table);
-        }
-        return self::$models[$table];
-    }
+abstract class model extends hexi {
 
     /**
      * 表名称
@@ -37,7 +19,9 @@ class model extends hexi {
      */
     private function __construct($table) {
         $this->table = $table;
-        $this->_pdo();
+        if ($this->_config('model', 'auto_pdo')) {
+            $this->_pdo();
+        }
     }
 
     /**
@@ -53,6 +37,10 @@ class model extends hexi {
      */
     protected function _pdo($name = 'default') {
         if (!$this->pdo instanceof PDO) {
+            if ($GLOBALS['pdo'][$name] instanceof PDO) {
+                $this->pdo = $GLOBALS['pdo'][$name];
+                return $this->pdo;
+            }
             $config = $this->_config('database_' . $name, true);
             $option = array(
                 PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
@@ -62,6 +50,7 @@ class model extends hexi {
                 $option[PDO::MYSQL_ATTR_INIT_COMMAND] = "set names '" . $config['charset'] . "'";
             }
             $this->pdo = new PDO($config['dsn'], $config['user'], $config['password'], $option);
+            $GLOBALS['pdo'][$name] = $this->pdo;
         }
         return $this->pdo;
     }
@@ -83,6 +72,10 @@ class model extends hexi {
                     $value = web::init()->cookie($m[1], null);
                 } elseif ($m[0] == 'sever') {
                     $value = web::init()->server($m[1]);
+                } elseif ($m[0] == 'action') {
+                    $value = $this->_action($m[1]);
+                } elseif ($m[0] == 'param') {
+                    $value = $this->_url_param($m[1]);
                 } else {
                     $value = web::init()->input($m[1]);
                 }
@@ -205,6 +198,17 @@ class model extends hexi {
             return $this->pdo->lastInsertId();
         }
         return false;
+    }
+
+    /**
+     * 连接到数据库
+     * @return model
+     */
+    public function pdo() {
+        if (!$this->pdo) {
+            $this->_pdo();
+        }
+        return $this->_pdo();
     }
 
 }

@@ -119,7 +119,9 @@ class app {
      * @param Exception $exc
      */
     public static function error(Exception $exc) {
-        echo $exc->getMessage();
+        echo $exc->getMessage() . '<br/>';
+        echo nl2br($exc->getTraceAsString());
+        exit;
     }
 
     /**

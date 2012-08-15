@@ -17,7 +17,25 @@ abstract class controller extends action {
      * 初始化
      */
     public function __construct() {
+        parent::__construct();
         $this->web = web::init();
+        if ($this->_config('controller', 'auto_view')) {
+            $this->view = $this->_view();
+        }
+    }
+
+    /**
+     * 视图对象
+     * @var view
+     */
+    protected $view;
+
+    /**
+     * 获取视图对象
+     * @return view
+     */
+    protected function _view() {
+        return view::init();
     }
 
     /**
@@ -164,4 +182,5 @@ abstract class controller extends action {
      * @return mixed
      */
     abstract public function index();
+
 }

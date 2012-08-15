@@ -47,16 +47,18 @@ abstract class hexi {
      */
     protected function _import($name) {
         if (strstr($name, 'app.')) {
-            $name2 = str_replace('.', '/', rtrim($name, 'app.'));
+            $name2 = str_replace('.', '/', ltrim($name, 'app.'));
             $file = App_Path . $name2 . '.php';
         } else {
-            $name2 = str_replace('.', '/', rtrim($name, 'hexi.'));
+            $name2 = str_replace('.', '/', ltrim($name, 'hexi.'));
             $file = HeXi_Path . $name2 . '.php';
         }
-        if (!is_file($file)) {
-            $this->_error('无法import "' . $name . '"');
+        if (is_file($file)) {
+            require_once $file;
+            return;
+            //throw new Exception('无法import "' . $name . '"');
         }
-        require_once $file;
+        $this->_exception('无法import "' . $name . '"');
     }
 
     /**
@@ -64,7 +66,7 @@ abstract class hexi {
      * @param string $message
      * @throws Exception
      */
-    protected function _error($message) {
+    public function _exception($message) {
         throw new Exception($message);
     }
 
@@ -96,6 +98,23 @@ abstract class hexi {
             'time'  => $time,
             'memory'=> $size
         );
+    }
+
+    /**
+     * 获取action数据
+     * @param string $name
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function _action($name,$value=null){
+        if($value === null){
+            if($name === true){
+                return $GLOBALS['action']['data'];
+            }
+            return $GLOBALS['action']['data'][$name];
+        }
+        $GLOBALS['action']['data'][$name] = $value;
+        return $value;
     }
 
 }
