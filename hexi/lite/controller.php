@@ -145,11 +145,40 @@ abstract class controller extends action {
 
     /**
      * 错误http代码
-     * @param string $code
+     * @param string $message
+     * @param int $code
      */
-    protected function _error($code) {
+    protected function _error($message, $code = 200) {
         header('HTTP/1.1 ' . $code . ' ' . ucwords(self::$code[$code]));
         header('Status: ' . $code . ' ' . ucwords(self::$code[$code]));
+        $string = file_get_contents(HeXi_Path . 'www/error.html');
+        echo view::render_string($string, array(
+            'message'  => $message,
+            'back'     => true));
+    }
+
+    /**
+     * 成功页面
+     * @param string $message
+     * @param bool $url
+     */
+    protected function _success($message, $url = false) {
+        $string = file_get_contents(HeXi_Path . 'www/success.html');
+        echo view::render_string($string, array(
+            'message'=> $message,
+            'url'    => $url));
+    }
+
+    /**
+     * 提示页面
+     * @param string $message
+     * @param bool $back
+     */
+    protected function _notice($message, $back = true) {
+        $string = file_get_contents(HeXi_Path . 'www/notice.html');
+        echo view::render_string($string, array(
+            'message'  => $message,
+            'back'     => $back));
     }
 
     /**
@@ -178,9 +207,11 @@ abstract class controller extends action {
 
     /**
      * 默认方法
-     * @abstract
      * @return mixed
      */
-    abstract public function index();
+    public function index() {
+        $message = '欢迎使用 HeXi Lite !<br/><span class="tip">您的应用运行正常，请开始开发旅程！</span>';
+        $this->_success($message);
+    }
 
 }

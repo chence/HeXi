@@ -17,7 +17,7 @@ abstract class model extends hexi {
      * 初始化
      * @param string $table
      */
-    private function __construct($table) {
+    public function __construct($table) {
         $this->table = $table;
         if ($this->_config('model', 'auto_pdo')) {
             $this->_pdo();

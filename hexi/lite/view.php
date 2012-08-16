@@ -213,4 +213,23 @@ class view {
         }
         return $string;
     }
+
+    /**
+     * 渲染页面，获取最后的结果
+     * @static
+     * @param string $string
+     * @param array $viewData 数据
+     * @return string
+     */
+    public static function render_string($string, $viewData = array()) {
+        $string = self::compile_string($string);
+        file_put_contents(HeXi_Path . 'test.html', $string);
+        ob_start();
+        extract($viewData);
+        include_once HeXi_Path . 'test.html';
+        $content = ob_get_contents();
+        ob_end_clean();
+        unlink(HeXi_Path . 'test.html');
+        return $content;
+    }
 }
