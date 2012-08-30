@@ -1,12 +1,8 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: fuxiaohei
- * Date: 12-8-11
- * Time: 下午4:40
- * To change this template use File | Settings | File Templates.
+ * PDO数据库类
  */
-class HeXiPdoDriver extends HeXiDriver {
+class DbPDO extends abstractDb {
 
     /**
      * PDO对象
@@ -22,28 +18,27 @@ class HeXiPdoDriver extends HeXiDriver {
 
     /**
      * 初始化方法
-     * @param string $name 数据库名称
-     * @throws HeXiDriverException
+     * @throws HeXiException
      */
-    public function __construct($name = 'default') {
+    public function __construct() {
         #判断PDO是否支持
         if (!class_exists('PDO', false)) {
-            throw new HeXiDriverException('PDO unsupported !');
+            HeXi::error('系统环境不支持PDO数据库');
         }
-        parent::__construct($name);
+        parent::__construct();
     }
 
     /**
      * 连接到数据库
-     * @param array $config
+     * @return mixed|void
      */
-    public function connect($config) {
+    public function connect() {
         #生成DSN连接字符串
-        $dsn = $this->createDSN($config);
+        $dsn = $this->createDSN();
         #生成连接配置
-        $options = $this->createOption($config);
+        $options = $this->createOption();
         try {
-            $this->conn = new PDO($dsn, $config['user'], $config['password'], $options);
+            $this->conn = new PDO($dsn, DB_USER, DB_PWD, $options);
         } catch (PDOException $exc) {
             parent::execError($exc->getMessage());
         }
@@ -51,29 +46,27 @@ class HeXiPdoDriver extends HeXiDriver {
 
     /**
      * 生成连接字符串
-     * @param array $config
      * @return string
      */
-    private function createDSN($config) {
-        $type = $config['type'];
+    private function createDSN() {
+        $type = DB_TYPE;
         switch ($type) {
             case 'mysql':
-                $dsn = "mysql:host=" . $config['host'] . ';port=' . $config['port'] . ';dbname=' . $config['dbname'];
+                $dsn = "mysql:host=" . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_DBNAME;
                 break;
             case 'sqlite':
             default:
-                $dsn = "sqlite:" . HeXiWebApp::getPath() . $config['file'];
+                $dsn = "sqlite:" . DB_FILE;
         }
         return $dsn;
     }
 
     /**
      * 生成默认数据库请求
-     * @param array $config
      * @return array
      */
-    private function createOption($config) {
-        $type = $config['type'];
+    private function createOption() {
+        $type = DB_TYPE;
         $options = array();
         #默认结果集转化为对象
         $options[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_OBJ;
@@ -82,7 +75,7 @@ class HeXiPdoDriver extends HeXiDriver {
         switch ($type) {
             case 'mysql':
                 #mysql设置字符串
-                $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'set names "' . $config['charset'] . '"';
+                $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'set names "' . DB_CHARSET . '"';
                 break;
             case 'sqlite':
             default:
@@ -96,9 +89,6 @@ class HeXiPdoDriver extends HeXiDriver {
      * @param string $sql
      */
     private function logSql($sql) {
-        if (HEXI_DEBUG) {
-            HeXiLogger::write('Database query "' . $sql . '"', __METHOD__, __FILE__, __LINE__);
-        }
         $this->execSql[] = $sql;
     }
 
@@ -232,7 +222,7 @@ class HeXiPdoDriver extends HeXiDriver {
             $this->execError();
         }
         $this->logSql($statement);
-        foreach ($bindData as $key=> $value) {
+        foreach ($bindData as $key => $value) {
             #绑定的占位符都是形如:xxx
             $this->stmt->bindValue(':' . $key, $value, $this->getDataType($value));
         }
@@ -261,7 +251,7 @@ class HeXiPdoDriver extends HeXiDriver {
         }
         #保存一遍SQL语句，说明执行了多次
         $this->logSql($this->stmt->queryString);
-        foreach ($bindData as $key=> $value) {
+        foreach ($bindData as $key => $value) {
             $this->stmt->bindValue(':' . $key, $value, $this->getDataType($value));
         }
         $res = $this->stmt->execute();

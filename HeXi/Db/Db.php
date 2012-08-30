@@ -1,8 +1,49 @@
 <?php
 
+/**
+ * 数据库调用类
+ * @author FuXiaoHei
+ */
+class Db {
 
-abstract class HeXiDriver {
+    /**
+     * 数据库单例
+     * @var abstractDb|DbPDO
+     */
+    protected static $db;
 
+    /**
+     * 获取数据库
+     * @return DbPDO
+     */
+    public static function get() {
+        if (!self::$db) {
+            self::$db = self::getDb();
+        }
+        return self::$db;
+    }
+
+    /**
+     * 生成数据库对象，私有方法
+     * @return DbPDO
+     */
+    protected static function getDb() {
+        switch (DB_DRIVER) {
+            case 'pdo':
+            default:
+                require_once 'DbPDO.php';
+                return new DbPDO();
+            /**
+             * @todo 完善其他驱动类型
+             */
+        }
+    }
+}
+
+/**
+ * 数据库抽象类
+ */
+abstract class abstractDb {
     /**
      * 数据库连接对象
      * @var object
@@ -15,44 +56,22 @@ abstract class HeXiDriver {
      */
     protected $stmt;
 
-    /**
-     * 驱动对象的名称
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * 获取数据库配置
-     * @var array
-     */
-    protected $config;
 
     /**
      * 初始化
-     * @param string $name
      */
-    public function __construct($name = 'default') {
-        $this->name = $name;
-        $this->config = $GLOBALS['config']['database_' . $name];
-        $this->connect($this->config);
+    public function __construct() {
+        $this->connect();
         $this->execSql = array();
     }
 
-    /**
-     * 获取驱动对象的名称
-     * @return string
-     */
-    public function getDriverObjectName() {
-        return $this->name;
-    }
 
     /**
      * 连接到数据库
      * @abstract
-     * @param array $config
      * @return mixed
      */
-    abstract public function connect($config);
+    abstract public function connect();
 
     /**
      * 断开连接
@@ -202,10 +221,9 @@ abstract class HeXiDriver {
     /**
      * 抛出数据库错误
      * @param string $message
-     * @throws HeXiDriverException
      */
     protected function execError($message = '') {
-        throw new HeXiDriverException($message);
+        HeXi::error($message);
     }
 
     /**
@@ -221,9 +239,5 @@ abstract class HeXiDriver {
     public function getExecSql() {
         return $this->execSql;
     }
-
-}
-
-class HeXiDriverException extends HeXiException {
 
 }
