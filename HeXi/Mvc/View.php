@@ -130,7 +130,7 @@ class View {
         #循环布局元素
         foreach ($subTpl as $str => $tpl) {
             #通过视图文件判断嵌入视图的位置
-            $tpl = dirname($file) . '/' . $tpl . '.' . VIEW_SUFFIX;
+            $tpl = dirname($file) . DS . $tpl . '.' . VIEW_SUFFIX;
             if (!is_file($tpl)) {
                 HeXi::error('嵌入的视图文件 "' . $tpl . '" 无法加载');
             }

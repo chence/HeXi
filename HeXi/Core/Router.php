@@ -111,7 +111,11 @@ class Router {
         #确定执行方法，空方法就使用默认方法
         $method = !$method ? CONTROLLER_METHOD_DEFAULT : $method;
         if (!is_callable(array($controller, $method))) {
-            HeXi::error('无法在控制器 "' . get_class($controller) . '" 中调用方法 "' . $method . '"');
+            if (CONTROLLER_ROUTE_DIRECT) {
+                HeXi::error('无法在控制器 "' . get_class($controller) . '" 中调用方法 "' . $method . '"');
+            } else {
+                $method = CONTROLLER_METHOD_DEFAULT;
+            }
         }
         #先执行before的方法
         if ($filter == 'before' || $filter == 'all') {
@@ -132,9 +136,9 @@ class Router {
      * @param null|string $filter
      * @return Router
      */
-    public static function execute($url,$filter=null){
+    public static function execute($url, $filter = null) {
         $router = new Router();
-        $router->run($url,$filter);
+        $router->run($url, $filter);
         return $router;
     }
 }

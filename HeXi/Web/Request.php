@@ -101,6 +101,15 @@ class Request {
     }
 
     /**
+     * 获取上传对象
+     * @param string $formName
+     * @return Upload
+     */
+    public function upload($formName){
+        return new Upload($formName);
+    }
+
+    /**
      * 组合Data数据
      * @return array
      */

@@ -41,6 +41,8 @@ class Response {
         $this->header['X-Powered-By'] = 'HeXi 0.5';
         $this->isSend = false;
         $this->pause = false;
+        $this->image = false;
+        $this->imageDelete = false;
     }
 
     /**
@@ -110,6 +112,21 @@ class Response {
     }
 
     /**
+     * 显示图片
+     * @param string $type
+     * @param string $file
+     * @param bool $delete
+     */
+    public function image($type, $file, $delete = false) {
+        if (!is_file($file)) {
+            HeXi::error('要下载的文件 "' . $file . '" 无法找到');
+        }
+        $this->contentType = $type;
+        $this->image = $file;
+        $this->imageDelete = (bool)$delete;
+    }
+
+    /**
      * 文件下载
      * @param string $file
      * @throws HeXiException
@@ -140,7 +157,7 @@ class Response {
      * @param string $file
      * @param array $data
      */
-    public function view($file,$data = array()) {
+    public function view($file, $data = array()) {
         $view = View::init();
         $view->viewData += $data;
         $this->body = $view->fetch($file);
@@ -177,6 +194,18 @@ class Response {
         header('Content-type:' . $this->contentType . ';charset=' . $this->charset);
         foreach ($this->header as $key => $header) {
             header($key . ':' . $header);
+        }
+        #显示图片
+        if ($this->image) {
+            #用image函数输出图片比文件输出慢很多
+            $fp = fopen($this->image, 'rb');
+            fpassthru($fp);
+            fclose($fp);
+            #如果是临时图片，删掉
+            if ($this->imageDelete) {
+                @unlink($this->image);
+            }
+            return;
         }
         #处理下载文件
         if ($this->download) {
