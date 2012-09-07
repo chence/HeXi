@@ -1,13 +1,7 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: FuXiaoHei
- * Date: 12-8-29
- * Time: 下午7:02
- */
-/**
- * @author FuXiaoHei
- */
+    /**
+     * @author FuXiaoHei
+     */
 class Response {
 
     private static $obj;
@@ -119,7 +113,7 @@ class Response {
      */
     public function image($type, $file, $delete = false) {
         if (!is_file($file)) {
-            HeXi::error('要下载的文件 "' . $file . '" 无法找到');
+            error('要下载的文件 "' . $file . '" 无法找到');
         }
         $this->contentType = $type;
         $this->image = $file;
@@ -133,7 +127,7 @@ class Response {
      */
     public function download($file) {
         if (!is_file($file)) {
-            HeXi::error('要下载的文件 "' . $file . '" 无法找到');
+            error('要下载的文件 "' . $file . '" 无法找到');
         }
         $filename = basename($file);
         $this->contentType = "application/octet-stream";
@@ -215,4 +209,5 @@ class Response {
         echo $this->body;
         $this->isSend = true;
     }
+
 }

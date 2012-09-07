@@ -28,7 +28,7 @@ class Db {
      * @return DbPDO
      */
     protected static function getDb() {
-        switch (DB_DRIVER) {
+        switch (config('database_driver')) {
             case 'pdo':
             default:
                 require_once 'DbPDO.php';
@@ -223,7 +223,7 @@ abstract class abstractDb {
      * @param string $message
      */
     protected function execError($message = '') {
-        HeXi::error($message);
+        error($message);
     }
 
     /**

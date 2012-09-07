@@ -35,15 +35,11 @@ class Request {
         $this->get = (object)$_GET;
         $this->post = (object)$_POST;
         $this->request = (object)$_REQUEST;
-        $this->cookie = (object)$_COOKIE;
-        #把服务器信息写入自身变量
-        if (REQUEST_FILES_AUTO) {
-            $this->makeFile();
-        }
-        #把文件上传信息写入自身变量
-        if (REQUEST_SERVER_AUTO) {
-            $this->makeServer();
-        }
+        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->host = $_SERVER['SERVER_NAME'];
+        $this->scheme = $_SERVER['REQUEST_SCHEME'];
+        $this->agent = $_SERVER['HTTP_USER_AGENT'];
+        $this->ip = $_SERVER['REMOTE_ADDR'];
     }
 
     /**
@@ -77,27 +73,27 @@ class Request {
     public $ip;
 
     /**
-     * 保存SERVER信息
-     */
-    public function makeServer() {
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->host = $_SERVER['SERVER_NAME'];
-        $this->scheme = $_SERVER['REQUEST_SCHEME'];
-        $this->agent = $_SERVER['HTTP_USER_AGENT'];
-        $this->ip = $_SERVER['REMOTE_ADDR'];
-    }
-
-    /**
      * 保存FILES信息
      * @var object
      */
     public $files;
 
     /**
-     * 保存FILES信息
+     * 获取Cookie对象
+     * @return Cookie
      */
-    public function makeFile() {
-        $this->files = (object)$_FILES;
+    public function cookie(){
+        import('HeXi.Web.Cookie');
+        return Cookie::init();
+    }
+
+    /**
+     * 获取Session对象
+     * @return Session
+     */
+    public function session(){
+        import('HeXi.Web.Session');
+        return Session::init();
     }
 
     /**
@@ -106,6 +102,7 @@ class Request {
      * @return Upload
      */
     public function upload($formName){
+        import('HeXi.Web.Upload');
         return new Upload($formName);
     }
 

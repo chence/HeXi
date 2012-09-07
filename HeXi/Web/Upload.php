@@ -74,11 +74,11 @@ class Upload {
             $this->fileData[] = (object)$files;
         }
         #预设配置信息
-        $this->path = UPLOAD_PATH;
-        $this->allowType = explode(',', UPLOAD_FILE);
-        $this->checkMime = UPLOAD_MIME;
-        $this->namedType = UPLOAD_SAVE_TYPE;
-        $this->maxSize = UPLOAD_SIZE;
+        $this->path = config('upload.path');
+        $this->allowType = explode(',', config('upload.files'));
+        $this->checkMime = config('upload.mime');
+        $this->namedType = config('upload.saving');
+        $this->maxSize = config('upload.maxsize');
         $this->errMessage = array();
         $this->resMessage = array();
     }
@@ -107,7 +107,7 @@ class Upload {
     }
 
     /**
-     *
+     * 检查后缀名
      */
     private function checkType() {
         foreach ($this->fileData as $key => $file) {
@@ -121,14 +121,14 @@ class Upload {
     }
 
     /**
-     *
+     * 检查文件类型
      */
     private function checkMime() {
 
     }
 
     /**
-     *
+     * 命名文件
      */
     private function namedFile() {
         foreach ($this->fileData as $key => $file) {
@@ -139,20 +139,30 @@ class Upload {
                 }
                 $this->fileData[$key]->save_file = $path . uniqid() . '.' . $file->suffix;
             }
+            if ($this->namedType == 'month') {
+                $path = $this->path . date('ym') . DS;
+                if (!is_dir($path)) {
+                    @mkdir($path, 0777, true);
+                }
+                $this->fileData[$key]->save_file = $path . uniqid() . '.' . $file->suffix;
+            }
         }
     }
 
     /**
+     * 保存文件
      * @return Upload
      */
     public function save() {
-        if(!$this->fileData[0]){
+        if (!$this->fileData[0]) {
             $this->errMessage[0] = '没有上传文件';
             return $this;
         }
         $this->checkError();
         $this->checkType();
-        $this->checkMime();
+        if ($this->checkMime) {
+            $this->checkMime();
+        }
         $this->namedFile();
         $this->saveFiles();
         return $this;
@@ -161,8 +171,8 @@ class Upload {
     /**
      * @return bool
      */
-    public function isOk(){
-        if($this->errMessage){
+    public function isOk() {
+        if ($this->errMessage) {
             return false;
         }
         return true;
@@ -171,17 +181,17 @@ class Upload {
     /**
      * @return array
      */
-    public function error(){
+    public function error() {
         return $this->errMessage;
     }
 
     /**
-     *
+     * 保存文件
      */
     private function saveFiles() {
         foreach ($this->fileData as $key => $file) {
-            if(!move_uploaded_file($file->tmp_name,$file->save_file)){
-                if(!copy($file->tmp_name,$file->save_file)){
+            if (!move_uploaded_file($file->tmp_name, $file->save_file)) {
+                if (!copy($file->tmp_name, $file->save_file)) {
                     $this->errMessage[$key] = '上传文件失败';
                     unset($this->fileData[$key]);
                     continue;

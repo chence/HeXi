@@ -23,7 +23,7 @@ class DbPDO extends abstractDb {
     public function __construct() {
         #判断PDO是否支持
         if (!class_exists('PDO', false)) {
-            HeXi::error('系统环境不支持PDO数据库');
+            error('系统环境不支持PDO数据库');
         }
         parent::__construct();
     }
@@ -38,7 +38,7 @@ class DbPDO extends abstractDb {
         #生成连接配置
         $options = $this->createOption();
         try {
-            $this->conn = new PDO($dsn, DB_USER, DB_PWD, $options);
+            $this->conn = new PDO($dsn, config('database.user'), config('database_password'), $options);
         } catch (PDOException $exc) {
             parent::execError($exc->getMessage());
         }
@@ -49,14 +49,14 @@ class DbPDO extends abstractDb {
      * @return string
      */
     private function createDSN() {
-        $type = DB_TYPE;
+        $type = config('database.type');
         switch ($type) {
             case 'mysql':
-                $dsn = "mysql:host=" . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_DBNAME;
+                $dsn = "mysql:host=" . config('database.host') . ';port=' . config('database.port') . ';dbname=' . config('database.dbname');
                 break;
             case 'sqlite':
             default:
-                $dsn = "sqlite:" . DB_FILE;
+                $dsn = "sqlite:" . config('database.file');
         }
         return $dsn;
     }
@@ -66,7 +66,7 @@ class DbPDO extends abstractDb {
      * @return array
      */
     private function createOption() {
-        $type = DB_TYPE;
+        $type = config('database.type');
         $options = array();
         #默认结果集转化为对象
         $options[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_OBJ;
@@ -75,12 +75,13 @@ class DbPDO extends abstractDb {
         switch ($type) {
             case 'mysql':
                 #mysql设置字符串
-                $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'set names "' . DB_CHARSET . '"';
+                $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'set names "' . config('database.charset') . '"';
                 break;
             case 'sqlite':
             default:
                 break;
         }
+        $options += config('database.options');
         return $options;
     }
 

@@ -18,13 +18,13 @@ class Model {
      */
     public static final function get($name) {
         if (!self::$obj[$name]) {
-            $modelFile = MODEL_PATH . $name . 'Model.php';
+            $modelFile = config('model.path') . $name . 'Model.php';
             if (!is_file($modelFile)) {
-                HeXi::error('无法加载模型类文件 "' . $name . 'Model"');
+                error('无法加载模型类文件 "' . $name . 'Model"');
             }
             require_once $modelFile;
             if (!class_exists($name . 'Model', false)) {
-                HeXi::error('无法加载模型类 "' . $name . 'Model"');
+                error('无法加载模型类 "' . $name . 'Model"');
             }
             $modelName = $name . 'Model';
             self::$obj[$name] = new $modelName();
@@ -98,7 +98,7 @@ abstract class abstractModel {
         #重设属性
         $this->reset();
         #自动加载数据库
-        if (MODEL_DB_AUTO) {
+        if (config('model.database')) {
             $this->conn = Db::get();
         }
     }
@@ -126,14 +126,14 @@ abstract class abstractModel {
      */
     protected function insert($data) {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         if ($this->fields == '*') {
-            HeXi::error('INSERT，添加数据的字段设置错误');
+            error('INSERT，添加数据的字段设置错误');
         }
         $keys = explode(',', $this->fields);
         if (count($keys) != count($data)) {
-            HeXi::error('INSERT，添加的数据和字段不匹配');
+            error('INSERT，添加的数据和字段不匹配');
         }
         $sql = "INSERT INTO {$this->table}({$this->fields}) VALUES (:";
         $sql .= join(':,', $keys) . ')';
@@ -148,10 +148,10 @@ abstract class abstractModel {
      */
     protected function delete() {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         if (!$this->condition) {
-            HeXi::error('DELETE，必须设置删除的WHERE限制条件');
+            error('DELETE，必须设置删除的WHERE限制条件');
         }
         $sql = "DELETE FROM {$this->table} WHERE {$this->condition}";
         return $this->conn->exec($sql);
@@ -163,7 +163,7 @@ abstract class abstractModel {
      */
     protected function find() {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         $sql = "SELECT {$this->fields} FROM {$this->table} ";
         #关联查询
@@ -191,7 +191,7 @@ abstract class abstractModel {
      */
     protected function findAll() {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         $sql = "SELECT {$this->fields} FROM {$this->table} ";
         if ($this->join) {
@@ -221,7 +221,7 @@ abstract class abstractModel {
      */
     protected function count($key) {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         $this->fields = 'count(' . $key . ') AS number';
         $result = $this->find();
@@ -235,14 +235,14 @@ abstract class abstractModel {
      */
     protected function update($data) {
         if (!$this->table) {
-            HeXi::error('没有设置操作的表名称');
+            error('没有设置操作的表名称');
         }
         if ($this->fields == '*') {
-            HeXi::error('UPDATE，更新数据的字段设置错误');
+            error('UPDATE，更新数据的字段设置错误');
         }
         $keys = explode(',', $this->fields);
         if (count($keys) != count($data)) {
-            HeXi::error('UPDATE，更新的数据和字段不匹配');
+            error('UPDATE，更新的数据和字段不匹配');
         }
         $sql = "UPDATE {$this->table} SET ";
         foreach ($keys as $k) {
