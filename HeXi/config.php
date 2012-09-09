@@ -39,7 +39,13 @@ $config['view'] = array(
         'auto' => true,
         'path' => APP_PATH . 'Runtime' . DS . 'Compile' . DS,
         'suffix' => 'php',
-        'expire' => -100
+        'expire' => -3600
+    ),
+    'cache' => array(
+        'path' => APP_PATH . 'Runtime' . DS . 'Html' . DS,
+        'expire' => -3600,
+        'suffix'=>'html',
+        'use'=>true
     )
 );
 
@@ -63,5 +69,13 @@ $config['upload'] = array(
     'mime' => false,
     'saving' => 'day',
     'maxsize' => 1024 * 1024 * 5
+);
+
+$config['cache'] = array(
+    'file'=>array(
+        'path' => APP_PATH . 'Runtime' . DS . 'Cache' . DS,
+        'expire' => 3600,
+        'suffix'=>'dat',
+    )
 );
 

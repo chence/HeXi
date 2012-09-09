@@ -111,6 +111,7 @@ class Router {
         #确定执行方法，空方法就使用默认方法
         $method = !$method ? config('controller.method.default') : $method;
         if (!is_callable(array($controller, $method))) {
+            #如果捕获所有方法，就把无法调用的方法都使用默认方法
             if (!config('controller.method.capture')) {
                 error('无法在控制器 "' . get_class($controller) . '" 中调用方法 "' . $method . '"');
             } else {

@@ -124,7 +124,9 @@ class Upload {
      * 检查文件类型
      */
     private function checkMime() {
-
+        /**
+         * @todo 上传时检查MIME类型
+         */
     }
 
     /**

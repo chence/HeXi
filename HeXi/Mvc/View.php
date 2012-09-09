@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: FuXiaoHei
- * Date: 12-9-7
- * Time: 上午10:39
- */
+
 /**
  * @author FuXiaoHei
  */
@@ -36,6 +31,7 @@ class View {
         $this->compileExpire = config('view.compile.expire');
         $this->viewData = array();
         $this->theme = array();
+        $this->resetCache();
     }
 
     /**
@@ -87,6 +83,34 @@ class View {
     public $theme;
 
     /**
+     * 是否Cache
+     * @var string
+     */
+    public $cache;
+
+    /**
+     * 缓存对象
+     * @var CacheFile
+     */
+    protected $cacheObject;
+
+    /**
+     * 重置Cache对象
+     * @return View
+     */
+    public function resetCache() {
+        $this->cache = config('view.cache.use');
+        if ($this->cache) {
+            import('HeXi.Cache.Cache');
+            $this->cacheObject = Cache::get('file');
+            $this->cacheObject->path = config('view.cache.path');
+            $this->cacheObject->expire = config('view.cache.expire');
+            $this->cacheObject->suffix = config('view.cache.suffix');
+        }
+        return $this;
+    }
+
+    /**
      * 编译布局视图
      * @param string $file
      * @param bool $hasChild
@@ -106,7 +130,7 @@ class View {
         #循环布局元素
         foreach ($subTpl as $str => $tpl) {
             #判断是不是已经提交的视图
-            if (array_key_exists($tpl,$this->theme)) {
+            if (array_key_exists($tpl, $this->theme)) {
                 if (is_file($this->theme[$str])) {
                     $tpl = $this->theme[$str];
                 } else {
@@ -166,10 +190,10 @@ class View {
             if (filemtime($compileFile) + $this->compileExpire < time()) {
                 $string = $this->compileLayout($viewFile);
                 $string = $this->compileString($string);
-                $string .= "\n".'<!-- compiled at ' . date('y.m.d H:i:s') . ' -->';
+                $string .= "\n" . '<!-- compiled at ' . date('y.m.d H:i:s', NOW) . ' -->';
                 file_put_contents($compileFile, $string);
             }
-        }else{
+        } else {
             #不编译直接使用视图文件
             $compileFile = $viewFile;
         }
@@ -180,8 +204,37 @@ class View {
         #获取内容
         $content = ob_get_contents();
         ob_end_clean();
+        if ($this->cache) {
+            $content .= "\n" . '<!-- cached at ' . date('y.m.d H:i:s', NOW) . ' -->';
+            $this->cacheObject->set(md5($viewFile), $content);
+        }
         return $content;
     }
+
+    public function cache($file) {
+        #寻找视图文件
+        $viewFile = $this->path . $file . '.' . $this->suffix;
+        if (!is_file($viewFile)) {
+            HeXi::error('无法加载视图文件 "' . $viewFile . '"');
+        }
+        if ($this->cache) {
+            $content = $this->cacheObject->get(md5($viewFile));
+            if ($content) {
+                return $content;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function display($file) {
+        $content = $this->cache($file);
+        if (!$content) {
+            return $this->fetch($file);
+        }
+        return $content;
+    }
+
 }
 
 

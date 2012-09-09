@@ -154,7 +154,7 @@ class Response {
     public function view($file, $data = array()) {
         $view = View::init();
         $view->viewData += $data;
-        $this->body = $view->fetch($file);
+        $this->body = $view->display($file);
     }
 
     /**
