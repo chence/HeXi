@@ -1,31 +1,34 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: FuXiaoHei
- * Date: 12-9-7
- * Time: 下午2:20
+ *
+ * HeXi 快速开发框架
+ *
+ *
+ * @copyright Copyright (c) 2012 <hexiaz.com>
+ * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
+ * @create: 12-11-23 - 下午8:39
+ * @link      : http://hexiaz.com
+ *
+ *
  */
+error_reporting(E_ALL ^ E_NOTICE);
 
 define('DS', DIRECTORY_SEPARATOR);
 
 define('NOW', time());
 
-define('EOL', PHP_EOL);
+define('RootDir', __DIR__ . DS);
 
-define('TIMEZONE', 'PRC');
+define('AppName', 'App');
 
-//-----------------------------
+define(AppName . 'Dir', RootDir . 'app' . DS);
 
-define('ROOT_PATH', dirname(__FILE__) . DS);
+define('LibDir', RootDir . 'lib' . DS);
 
-define('HEXI_PATH', ROOT_PATH . 'HeXi' . DS);
+define('HeXiDir', LibDir . 'HeXi' . DS);
 
-define('APP_PATH', ROOT_PATH . 'demo' . DS);
+require HeXiDir.'HeXi.php';
 
-//---------------------------
+HeXi::run();
 
-require_once HEXI_PATH.'config.php';
-
-require_once HEXI_PATH.'HeXi.php';
-
-HeXi::run($config);
+Error::stop('错误');

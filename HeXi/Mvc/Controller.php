@@ -1,99 +1,63 @@
 <?php
+/**
+ *
+ * HeXi 快速开发框架
+ *
+ *
+ * @copyright Copyright (c) 2012 <hexiaz.com>
+ * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
+ * @create: 12-11-23 - 下午7:45
+ * @link      : http://hexiaz.com
+ *
+ *
+ */
 
 /**
- * 控制器基类
- * @author FuXiaoHei
+ * 控制器调用类
+ * 负责控制器的生成和调用
+ * @package Mvc
+ * @author  FuXiaoHei <fuxiaohei@hexiaz.com>
+ *
  */
+
 class Controller {
 
-
     /**
-     * 路由对象
-     * @var Router
+     * 生成控制器对象
+     * @param string $cmd
+     * @return bool|HeXiBaseController|HeXiActionController
      */
-    protected $router;
-
-    /**
-     * 初始化
-     */
-    public function __construct() {
-        #初始化时载入请求对象和路由对象
-        $this->router = Router::init();
-        $this->request = Request::init();
-        $this->response = Response::init();
+    public static function create($cmd) {
+        $controllerName = $cmd;
+        if (strstr($cmd, '.')) {
+            $controllerName = explode('.', $cmd);
+            $controllerName = $controllerName[0] . ucwords($controllerName[1]);
+        }
+        $cmd = Config::get('app.controller.cmd') . '.' . $cmd;
+        $controller = Register::create($controllerName, $cmd, false);
+        if (!$controller) {
+            return false;
+        }
+        if ((!$controller instanceof HeXiBaseController) && (!$controller instanceof HeXiActionController)) {
+            Error::stop('无法执行无效的控制器 "' . get_class($controller) . '"');
+        }
+        return $controller;
     }
 
     /**
-     * 请求对象
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * 返回请求对象
-     * @var Response
-     */
-    protected $response;
-
-    /**
-     * 过滤数组
-     * @var array
-     */
-    protected $filters;
-
-    /**
-     * 添加过滤规则
-     * @param string $name
-     * @param string $command
-     * @return Controller
-     */
-    protected final function filter($name, $command) {
-        $this->filters[$name][] = $command;
-        return $this;
-    }
-
-    /**
-     * 执行过滤规则
-     * @param string $name
-     */
-    public function doFilter($name) {
-        #如果是before，先执行before_all
-        if (strstr($name, 'before_') && $name != 'before_all') {
-            $this->doFilter('before_all');
-        }
-        #然后执行before或after
-        if ($this->filters[$name]) {
-            foreach ($this->filters[$name] as $filter) {
-                $this->{$filter}();
-            }
-        }
-        #如果是after，执行完after再执行after_all
-        if (strstr($name, 'after_') && $name != 'after_all') {
-            $this->doFilter('after_all');
-        }
-    }
-
-    /**
-     * 调用Model方法
-     * @param string $command 操作如xxx->yyy即xxxModel的yyy方法
+     * 执行控制器
+     * @param string|HeXiActionController|HeXiBaseController $controllerObject 控制器对象或引入命令
+     * @param string                                         $method
      * @return mixed
      */
-    protected function model($command) {
-        $args = func_get_args();
-        $command = explode('->', $command);
-        $model = Model::get($command[0]);
-        if (!is_callable(array($model, $command[1]))) {
-            HeXi::error('无法在模型 "' . get_class($model) . '" 调用方法 "' . $command[1] . '"');
+    public static function invoke($controllerObject, $method) {
+        if (is_string($controllerObject)) {
+            $controllerObject = self::create($controllerObject);
         }
-        array_shift($args);
-        return call_user_func_array(array($model, $command[1]), $args);
-    }
-
-    /**
-     * 析构方法
-     */
-    public function __destruct() {
-        #析构是释放请求
-        $this->response->end();
+        if (!is_callable(array( $controllerObject, $method ))) {
+            Error::stop('无法调用控制器 "' . get_class($controllerObject) . '" 中的方法 "' . $method . '"');
+        }
+        Event::trigger('appControllerInvoke:'.get_class($controllerObject).'->'.$method);
+        return call_user_func(array( $controllerObject, $method ));
     }
 }

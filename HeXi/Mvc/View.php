@@ -1,153 +1,219 @@
 <?php
-
 /**
- * @author FuXiaoHei
+ *
+ * HeXi 快速开发框架
+ *
+ *
+ * @copyright Copyright (c) 2012 <hexiaz.com>
+ * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
+ * @create: 12-11-23 - 下午7:45
+ * @link      : http://hexiaz.com
+ *
+ *
  */
+/**
+ *
+ * 视图模板的操作类
+ * 带有模板引擎
+ * @package Mvc
+ * @author  FuXiaoHei <fuxiaohei@hexiaz.com>
+ *
+ */
+
 class View {
 
     /**
-     * 单例对象
-     * @var View
+     * 视图对象的实例
+     * @var bool|array
      */
-    private static $obj;
+    private static $view = false;
 
     /**
-     * 获取单例
+     * 生成视图对象
+     * @param string $dir
      * @return View
      */
-    public static function init() {
-        return !self::$obj ? self::$obj = new View() : self::$obj;
+    public static function create($dir = 'default') {
+        if (!self::$view[$dir]) {
+            self::$view[$dir] = new View($dir);
+        }
+        return self::$view[$dir];
     }
 
     /**
-     * 私有化构造方法
-     */
-    private function __construct() {
-        $this->path = config('view.path');
-        $this->suffix = config('view.suffix');
-        $this->compile = config('view.compile.auto');
-        $this->compilePath = config('view.compile.path');
-        $this->compileSuffix = config('view.compile.suffix');
-        $this->compileExpire = config('view.compile.expire');
-        $this->viewData = array();
-        $this->theme = array();
-        $this->resetCache();
-    }
-
-    /**
-     * 视图地址
+     * 视图目录
      * @var string
      */
-    public $path;
+    private $dir;
 
     /**
-     * 视图后缀名
+     * 视图模板的文件名
      * @var string
      */
-    public $suffix;
+    private $template;
 
     /**
-     * 视图是否编译
-     * @var bool
+     * 视图需要的数据
+     * @var array
      */
-    public $compile;
+    private $data;
 
     /**
-     * 视图编译地址
+     * 视图文件的后缀名
      * @var string
      */
-    public $compilePath;
+    private $suffix;
 
     /**
-     * 视图编译后缀名
-     * @var string
+     * 视图编译的文件夹和开关
+     * @var string|bool
      */
-    public $compileSuffix;
+    private $compile;
 
     /**
-     * 视图编译过期时间
+     * 视图编译文件的过期时间
      * @var int
      */
-    public $compileExpire;
+    private $expire;
 
     /**
-     * 视图数据
-     * @var array
+     * 私有的初始化方法
+     * @param string $dir
      */
-    public $viewData;
+    private function __construct($dir) {
+        $this->dir = Config::get('app.view.cmd') . '.' . $dir;
+        $this->suffix = Config::get('app.view.suffix');
+        $this->compile = Config::get('app.view.compile');
+        $this->expire = Config::get('app.view.expire');
+        $this->data = array();
+    }
 
     /**
-     * 子视图的信息
-     * @var array
+     * 设置模板文件
+     * 获取模板文件
+     * @param bool|string $name
+     * @return string|View
      */
-    public $theme;
-
-    /**
-     * 是否Cache
-     * @var string
-     */
-    public $cache;
-
-    /**
-     * 缓存对象
-     * @var CacheFile
-     */
-    protected $cacheObject;
-
-    /**
-     * 重置Cache对象
-     * @return View
-     */
-    public function resetCache() {
-        $this->cache = config('view.cache.use');
-        if ($this->cache) {
-            import('HeXi.Cache.Cache');
-            $this->cacheObject = Cache::get('file');
-            $this->cacheObject->path = config('view.cache.path');
-            $this->cacheObject->expire = config('view.cache.expire');
-            $this->cacheObject->suffix = config('view.cache.suffix');
+    public function template($name = false) {
+        if (!$name) {
+            return $this->template;
         }
+        $this->template = $name;
         return $this;
     }
 
     /**
-     * 编译布局视图
-     * @param string $file
-     * @param bool $hasChild
-     * @return mixed|string
+     * 添加数据
+     * @param string $key
+     * @param mixed  $value
+     * @return View
      */
-    private function compileLayout($file, $hasChild = false) {
-        #获取匹配布局内容
-        $string = file_get_contents($file);
-        $pattern = '/<!--theme:(.*)-->/';
-        #没有匹配，返回字符串
-        if (!preg_match_all($pattern, $string, $matches)) {
-            return $string;
+    public function with($key, $value = null) {
+        if (is_array($key)) {
+            $this->data = array_merge($this->data, $key);
+            return $this;
         }
-        $matches[0] = array_unique($matches[0]);
-        $matches[1] = array_unique($matches[1]);
-        $subTpl = array_combine($matches[0], $matches[1]);
-        #循环布局元素
-        foreach ($subTpl as $str => $tpl) {
-            #判断是不是已经提交的视图
-            if (array_key_exists($tpl, $this->theme)) {
-                if (is_file($this->theme[$str])) {
-                    $tpl = $this->theme[$str];
-                } else {
-                    #通过视图文件判断嵌入视图的位置
-                    $tpl = dirname($file) . DS . $tpl . '.' . $this->suffix;
-                    if (!is_file($tpl)) {
-                        HeXi::error('嵌入的视图文件 "' . $tpl . '" 无法加载');
-                    }
+        $string = '$this->data["' . str_replace('.', '"]["', $key) . '"] = $value;';
+        eval($string);
+        return $this;
+    }
+
+    /**
+     * 删除数据
+     * @param string $key
+     * @return View
+     */
+    public function without($key) {
+        $string = 'unset($this->data["' . str_replace('.', '"]["', $key) . '"]);';
+        eval($string);
+        return $this;
+    }
+
+    /**
+     * 获取模板文件绝对地址
+     * @return string
+     */
+    private function getTemplateFile() {
+        return Register::cmd($this->dir . '.' . $this->template) . '.' . $this->suffix;
+    }
+
+    /**
+     * 获取模板文件对应的编译文件的绝对地址
+     * @param string $template
+     * @return string
+     */
+    private function getCompileFile($template) {
+        $template = $this->dir . '.' . $template;
+        $compile = $this->compile . '.' . md5($template);
+        return Register::cmd($compile) . '.php';
+    }
+
+    /**
+     * 判断模板文件的编译是否过期了
+     * @param string $template
+     * @return bool
+     */
+    public function isExpired($template) {
+        if (!$this->compile) {
+            return true;
+        }
+        $compile = $this->getCompileFile($template);
+        if (!is_file($compile)) {
+            return true;
+        }
+        if (NOW - filemtime($compile) < $this->expire) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 渲染模板和数据
+     * @return string
+     */
+    public function fetch() {
+        $realFile = $this->getTemplateFile();
+        if (!is_file($realFile)) {
+            Error::stop('无法加载模板文件 "' . $realFile . '"');
+        }
+        #如果没有编译，或者编译过期
+        if ($this->compile) {
+            $compileFile = $this->getCompileFile($this->template);
+            if ($this->isExpired($this->template)) {
+                $string = self::compileString(file_get_contents($realFile), $this->dir);
+                file_put_contents($compileFile, $string);
+            }
+            $realFile = $compileFile;
+        }
+        Event::trigger('appViewFetch');
+        return self::render(file_get_contents($realFile), $this->data);
+    }
+
+    /**
+     * 编译模板
+     * @param string $string 字符串
+     * @param string $dir    子模板的目录
+     * @return string
+     */
+    private static function compileString($string, $dir) {
+        $pattern = '/<!--include:(.*)-->/';
+        #没有匹配，返回字符串
+        if (preg_match_all($pattern, $string, $matches)) {
+            $matches[0] = array_unique($matches[0]);
+            $matches[1] = array_unique($matches[1]);
+            $subTpl = array_combine($matches[0], $matches[1]);
+            #循环布局元素
+            foreach ($subTpl as $str => $tpl) {
+                $cmd = $dir . '.' . $tpl;
+                $file = Register::cmd($cmd) . '.' . Config::get('app.view.suffix');
+                if (!is_file($file)) {
+                    $string = str_replace($str, $str . '<!-- no -->', $string);
+                    continue;
                 }
-                if ($hasChild) {
-                    #编译嵌入式图的嵌入视图，只处理第二级
-                    $string = str_replace($str, $this->compileLayout($tpl), $string);
-                } else {
-                    $string = str_replace($str, file_get_contents($tpl), $string);
-                }
+                $string = str_replace($str, file_get_contents($file), $string);
             }
         }
+        $string = self::compile($string);
         return $string;
     }
 
@@ -156,85 +222,34 @@ class View {
      * @param string $string
      * @return string
      */
-    private function compileString($string) {
+    public static function compile($string) {
         $string = str_replace('<!--foreach(', '<?php foreach(', $string);
         $string = str_replace('<!--for(', '<?php for(', $string);
         $string = str_replace(')-->', '){ ?>', $string);
-        $string = str_replace(array('<!--endforeach-->', '<!--endfor-->'), '<?php } ?>', $string);
+        $string = str_replace(array( '<!--endforeach-->', '<!--endfor-->' ), '<?php } ?>', $string);
         $string = str_replace('<!--if(', '<?php if(', $string);
         $string = str_replace('<!--elseif(', '<?php }elseif(', $string);
         $string = str_replace('<!--else-->', '<?php }else{ ?>', $string);
         $string = str_replace('<!--endif-->', '<?php } ?>', $string);
         $string = str_replace('{{', '<?php echo ', $string);
         $string = str_replace('<!--{', '<?php ', $string);
-        $string = str_replace(array('}-->', '}}'), ' ?>', $string);
+        $string = str_replace(array( '}-->', '}}' ), ' ?>', $string);
         return $string;
     }
 
-
     /**
-     * 渲染文件
-     * @param string $file
+     * 渲染模板和数据
+     * @param string $string
+     * @param array  $data
      * @return string
      */
-    public function fetch($file) {
-        #寻找视图文件
-        $viewFile = $this->path . $file . '.' . $this->suffix;
-        if (!is_file($viewFile)) {
-            HeXi::error('无法加载视图文件 "' . $viewFile . '"');
-        }
-        #先决定是否要编译
-        if ($this->compile) {
-            #编译视图内容，使用视图文件
-            $compileFile = $this->compilePath . md5($viewFile) . '.' . $this->compileSuffix;
-            if (filemtime($compileFile) + $this->compileExpire < time()) {
-                $string = $this->compileLayout($viewFile);
-                $string = $this->compileString($string);
-                $string .= "\n" . '<!-- compiled at ' . date('y.m.d H:i:s', NOW) . ' -->';
-                file_put_contents($compileFile, $string);
-            }
-        } else {
-            #不编译直接使用视图文件
-            $compileFile = $viewFile;
-        }
+    public static function render($string, $data) {
+        extract($data);
         ob_start();
-        #展开数据
-        extract($this->viewData);
-        include $compileFile;
-        #获取内容
-        $content = ob_get_contents();
+        eval('?>' . $string);
+        $string = ob_get_contents();
         ob_end_clean();
-        if ($this->cache) {
-            $content .= "\n" . '<!-- cached at ' . date('y.m.d H:i:s', NOW) . ' -->';
-            $this->cacheObject->set(md5($viewFile), $content);
-        }
-        return $content;
-    }
-
-    public function cache($file) {
-        #寻找视图文件
-        $viewFile = $this->path . $file . '.' . $this->suffix;
-        if (!is_file($viewFile)) {
-            HeXi::error('无法加载视图文件 "' . $viewFile . '"');
-        }
-        if ($this->cache) {
-            $content = $this->cacheObject->get(md5($viewFile));
-            if ($content) {
-                return $content;
-            }
-            return false;
-        }
-        return false;
-    }
-
-    public function display($file) {
-        $content = $this->cache($file);
-        if (!$content) {
-            return $this->fetch($file);
-        }
-        return $content;
+        return $string;
     }
 
 }
-
-
