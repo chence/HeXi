@@ -6,29 +6,29 @@
  *
  * @copyright Copyright (c) 2012 <hexiaz.com>
  * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
- * @create: 12-11-23 - 下午8:39
+ * @create: 12-11-28 - 下午7:36
  * @link      : http://hexiaz.com
  *
  *
  */
+
 error_reporting(E_ALL ^ E_NOTICE);
 
-define('DS', DIRECTORY_SEPARATOR);
+$GLOBALS['profile'] = array(
+    'time'   => microtime(true),
+    'memory' => memory_get_usage()
+);
 
-define('NOW', time());
+define('RootDir', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR);
 
-define('RootDir', __DIR__ . DS);
+define('LibDir', RootDir . 'lib' . DIRECTORY_SEPARATOR);
+
+define('HeXiDir', LibDir . 'HeXi' . DIRECTORY_SEPARATOR);
 
 define('AppName', 'App');
 
-define(AppName . 'Dir', RootDir . 'app' . DS);
+define(AppName . 'Dir', RootDir . 'app' . DIRECTORY_SEPARATOR);
 
-define('LibDir', RootDir . 'lib' . DS);
-
-define('HeXiDir', LibDir . 'HeXi' . DS);
-
-require HeXiDir.'HeXi.php';
+require HeXiDir . 'HeXi.php';
 
 HeXi::run();
-
-Error::stop('错误');

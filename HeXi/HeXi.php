@@ -6,21 +6,16 @@
  *
  * @copyright Copyright (c) 2012 <hexiaz.com>
  * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
- * @create: 12-11-23 - 下午7:40
+ * @create: 12-11-28 - 下午6:00
  * @link      : http://hexiaz.com
  *
  *
  */
-require 'Core/Error.php';
+require_once 'Error.php';
 
-Error::profile('app:start');
-
-require 'Core/Config.php';
-
-require 'Core/Register.php';
-
+require_once 'Register.php';
 /**
- *
+ * 核心类
  * @package HeXi
  * @author  FuXiaoHei <fuxiaohei@hexiaz.com>
  *
@@ -29,55 +24,49 @@ require 'Core/Register.php';
 class HeXi {
 
     /**
-     * 返回的结果内容
-     * @var string|null|Response|View
+     * 应用执行的结果
+     * @var string|Response
      */
-    private static $appResult = null;
+    private static $appData = null;
 
     /**
-     * 预备操作
+     * 执行前的预备信息
      */
     private static function prepare() {
-        Config::import('config');
         spl_autoload_register(function ($className) {
-            $cmd = Config::get('app.auto.' . $className);
-            if (!$cmd) {
-                Error::stop('无法自动加载库类 "' . $className . '"');
-            }
-            Register::import($cmd);
+            $command = 'HeXi.' . str_replace('_', '.', $className);
+            Register::import($command);
         });
-        Event::trigger('appPrepare');
+        Config::import(require(constant(AppName . 'Dir') . 'config.php'));
+        //set_error_handler();
+        //set_exception_handler();
+        register_shutdown_function(function () {
+            $error = error_get_last();
+            $invalidCode = array( E_WARNING, E_NOTICE, E_STRICT, E_DEPRECATED );
+            if (!in_array($error['type'], $invalidCode)) {
+                ob_end_clean();
+                Error::stop($error['message']);
+            }
+        });
     }
 
     /**
-     * 运行实体
+     * 运行应用
      */
     public static function run() {
         self::prepare();
-        Event::trigger('appRunStart');
-        self::$appResult = Router::run();
-        Event::trigger('appRunEnd');
-        self::result();
+        self::$appData = Router::run();
+        self::send();
     }
 
     /**
-     * 处理结果
+     * 发出结果
      */
-    private static function result() {
-        Event::trigger('appFinish');
-        if (is_string(self::$appResult)) {
-            Response::create()->body(self::$appResult)->send();
-            return;
-        }
-        if (self::$appResult instanceof Response) {
-            self::$appResult->send();
-            return;
-        }
-        if (self::$appResult instanceof View) {
-            Response::create()->body(self::$appResult->fetch())->send();
-            return;
-        }
-        //Response::create()->contentType('application/json')
-            //->body(json_encode(self::$appResult))->send();
+    private static function send() {
+       if(self::$appData instanceof Response){
+          self::$appData->send();
+           return;
+       }
+       Response::create(self::$appData)->send();
     }
 }

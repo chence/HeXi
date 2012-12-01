@@ -19,16 +19,16 @@
  *
  */
 
-class Sql {
+class Database_Sql {
 
     /**
      * 从表名创建一个SQL生成类
      * @param string $tableName 表名称
      * @param string $column 字段名称
-     * @return Sql
+     * @return Database_Sql
      */
     public static function table($tableName, $column = '*') {
-        return new Sql($tableName, $column);
+        return new Database_Sql($tableName, $column);
     }
 
     /**
@@ -93,7 +93,7 @@ class Sql {
     /**
      * 添加WHERE条件
      * @param string $condition
-     * @return Sql
+     * @return Database_Sql
      */
     public function where($condition) {
         $this->where[] = $condition;
@@ -109,7 +109,7 @@ class Sql {
     /**
      * 添加OR_WHERE条件
      * @param string $condition
-     * @return Sql
+     * @return Database_Sql
      */
     public function orWhere($condition) {
         $this->orWhere[] = $condition;
@@ -126,7 +126,7 @@ class Sql {
      * 添加JOIN条件
      * @param string $table
      * @param bool|string $on
-     * @return Sql
+     * @return Database_Sql
      */
     public function join($table, $on = false) {
         $this->join['table'] = $table;
@@ -144,7 +144,7 @@ class Sql {
      * 添加GROUP BY条件
      * @param string $column
      * @param bool|string $having
-     * @return Sql
+     * @return Database_Sql
      */
     public function group($column, $having = false) {
         $this->group['column'] = $column;
@@ -161,7 +161,7 @@ class Sql {
     /**
      * 添加ORDER BY条件
      * @param string $order
-     * @return Sql
+     * @return Database_Sql
      */
     public function order($order) {
         $this->order = $order;
@@ -178,7 +178,7 @@ class Sql {
      * 添加LIMIT条件
      * @param int $limit
      * @param int $offset
-     * @return Sql
+     * @return Database_Sql
      */
     public function limit($limit, $offset = 0) {
         if($offset){
@@ -193,7 +193,7 @@ class Sql {
      * 添加分页条件
      * @param int $page
      * @param int $size
-     * @return Sql
+     * @return Database_Sql
      */
     public function pager($page, $size) {
         $this->limit = ($page - 1) * $size . ',' . $size;
