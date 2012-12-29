@@ -1,4 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    #RewriteCond %{REQUEST_FILENAME} !-f
+    #RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule !.(js|ico|gif|jpg|png|css|less|ico|swf|txt|zip|pdf)$ index.php
 </IfModule>

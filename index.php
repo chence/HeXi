@@ -1,34 +1,22 @@
 <?php
 /**
- *
- * HeXi 快速开发框架
- *
- *
- * @copyright Copyright (c) 2012 <hexiaz.com>
- * @author    : FuXiaoHei <fuxiaohei@hexiaz.com>
- * @create: 12-11-28 - 下午7:36
- * @link      : http://hexiaz.com
- *
- *
+ * Created by JetBrains PhpStorm.
+ * User: FuXiaoHei
+ * Date: 12-12-29
+ * Time: 下午6:02
+ * To change this template use File | Settings | File Templates.
  */
 
-error_reporting(E_ALL ^ E_NOTICE);
+date_default_timezone_set('PRC');
 
-$GLOBALS['profile'] = array(
-    'time'   => microtime(true),
-    'memory' => memory_get_usage()
-);
+error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
 
-define('RootDir', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR);
+require_once 'lib/HeXi/HeXi.php';
 
-define('LibDir', RootDir . 'lib' . DIRECTORY_SEPARATOR);
+$app = new HeXi(__DIR__ . '/app/');
 
-define('HeXiDir', LibDir . 'HeXi' . DIRECTORY_SEPARATOR);
+$app->router->get('/blog/slug::string', function(){
+    var_dump($GLOBALS);
+});
 
-define('AppName', 'App');
-
-define(AppName . 'Dir', RootDir . 'app' . DIRECTORY_SEPARATOR);
-
-require HeXiDir . 'HeXi.php';
-
-HeXi::run();
+$app->run();
