@@ -219,6 +219,7 @@ class Router {
 
     /**
      * 路由分发
+     * @return bool 返回正确或错误
      */
     public function dispatch() {
         #处理URL和路由参数
@@ -236,10 +237,9 @@ class Router {
                 Error::stop('Invalid Request for Routing', 404);
             }
             $GLOBALS['callback'] = $callback;
-            call_user_func_array(array(HeXi::instance($callback[0]), $callback[1]), $this->args);
-            return;
+            return call_user_func_array(array(HeXi::instance($callback[0]), $callback[1]), $this->args);
         }
         $GLOBALS['callback'] = 'Closure';
-        call_user_func_array($callback, $this->args);
+        return call_user_func_array($callback, $this->args);
     }
 }

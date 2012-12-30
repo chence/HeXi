@@ -27,6 +27,11 @@ class HeXi {
             Error::stop("'$dir' is not invalid !", 404);
         }
         define('APP', $dir);
+        $appConfigFile = APP . 'config/app.php';
+        if (!is_file($appConfigFile)) {
+            Error::stop("Application Configuration file is missing !", 500);
+        }
+        self::$config['app'] = require($appConfigFile);
         #设置自动加载
         spl_autoload_register('HeXi::import');
         #引入路由类
@@ -41,6 +46,24 @@ class HeXi {
     }
 
     //-----------------------------------
+
+    /**
+     * 配置数组
+     * @var array
+     */
+    public static $config = array();
+
+    /**
+     * 引入配置文件
+     * @param string $filename
+     */
+    public static function loadConfig($filename) {
+        $appConfigFile = APP . 'config/' . $filename . '.php';
+        if (!is_file($appConfigFile)) {
+            Error::stop("Application {$filename} Configuration file is missing !", 500);
+        }
+        self::$config[$filename] = require($appConfigFile);
+    }
 
     /**
      * 引入类库
