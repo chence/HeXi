@@ -5,7 +5,7 @@
  * 抽象类的基类
  *
  */
-class Base_Class {
+abstract class Base_Class {
 
     /**
      * 配置信息

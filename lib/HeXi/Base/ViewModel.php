@@ -4,21 +4,16 @@
  * 视图模型类
  *
  * 就是带了一个View类
+ *
+ * @property View view
  */
 abstract class Base_ViewModel extends Base_Model {
-
-    /**
-     * View类
-     * @var View
-     */
-    protected $view;
 
     /**
      * 构造方法
      */
     public function __construct() {
         parent::__construct();
-        $this->view = $this->instance('View', get_class($this));
     }
 
     /**
@@ -45,6 +40,19 @@ abstract class Base_ViewModel extends Base_Model {
             $this->view->set($k, $v);
         }
         return $this->fetch($tpl);
+    }
+
+    /**
+     * 魔术方法获取View类
+     * @param string $key
+     * @return null|View
+     */
+    public function __get($key){
+        if($key === 'view'){
+            $this->view = $this->instance('View',get_class($this));
+            return $this->view;
+        }
+        return null;
     }
 
 }

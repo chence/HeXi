@@ -203,10 +203,10 @@ class Router {
      */
     private function autoRule($param) {
         if (!$param) {
-            return array('Home', 'index');
+            return array(HeXi::$config['app']['default'], HeXi::$config['app']['action']);
         }
         if (!$param[1]) {
-            $param[1] = 'index';
+            $param[1] = HeXi::$config['app']['action'];
         }
         #处理非法的方法名称
         if (!preg_match('#^[a-zA-Z_][0-9a-zA-Z_-]+$#', $param[1])) {

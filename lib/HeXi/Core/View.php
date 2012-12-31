@@ -35,7 +35,7 @@ class View {
      */
     public function __construct($named) {
         $this->named = $named;
-        $this->dir   = APP . 'theme/';
+        $this->dir   = HeXi::$config['app']['view']['dir'];
         $this->data  = array();
         $this->part  = array();
     }
@@ -43,7 +43,7 @@ class View {
     /**
      * 添加视图数据
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      * @return View
      */
     public function set($key, $value) {

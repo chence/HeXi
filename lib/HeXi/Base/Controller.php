@@ -6,7 +6,7 @@
  * @property Response response
  * @property View     view
  */
-class Base_Controller extends Base_Class {
+abstract class Base_Controller extends Base_Class {
 
     /**
      * 魔术方法获取对象

@@ -1,5 +1,10 @@
 <?php
 
+$GLOBALS['start'] = array(
+    'time'   => microtime(true),
+    'memory' => memory_get_usage()
+);
+
 require_once 'Base/Class.php';
 
 require_once 'Core/Error.php';

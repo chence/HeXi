@@ -2,5 +2,10 @@
 
 
 return array(
-    'default'=>'Home'
+    'default' => 'Home',
+    'action'  => 'index',
+    'error'   => 2,
+    'view'    => array(
+        'dir' => APP . 'theme/'
+    )
 );

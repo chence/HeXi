@@ -116,6 +116,7 @@ class Db_PDO extends Db_Abstract {
      * @return bool|int
      */
     public function exec($sql, $arg = array()) {
+        Db_SQL::log($sql);
         if (!$arg) {
             if (!$this->pdo->exec($sql)) {
                 $this->error();
@@ -147,6 +148,7 @@ class Db_PDO extends Db_Abstract {
      * @return bool|array
      */
     public function query($sql, $arg = array()) {
+        Db_SQL::log($sql);
         if (!$arg) {
             $this->stmt = $this->pdo->query($sql);
             if (!$this->stmt) {
@@ -174,6 +176,7 @@ class Db_PDO extends Db_Abstract {
      * @return array|bool
      */
     public function queryAll($sql, $arg = array()) {
+        Db_SQL::log($sql);
         if (!$arg) {
             $this->stmt = $this->pdo->query($sql);
             if (!$this->stmt) {

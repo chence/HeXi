@@ -28,7 +28,7 @@ class Db_SQL {
      * 记录SQL语句
      * @param string $string
      */
-    protected static function logSql($string) {
+    public static function log($string) {
         self::$logs[] = $string;
     }
 
@@ -195,7 +195,6 @@ class Db_SQL {
         $sql  = "INSERT INTO {$this->table}($this->column) VALUES (";
         $temp = explode(',', $this->column);
         $sql .= ':column_' . join(',:column_', $temp) . ')';
-        self::logSql($sql);
         return $sql;
     }
 
@@ -214,7 +213,6 @@ class Db_SQL {
         if ($this->limit) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        self::logSql($sql);
         return $sql;
     }
 
@@ -264,7 +262,6 @@ class Db_SQL {
         if ($this->limit) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        self::logSql($sql);
         return $sql;
     }
 
@@ -286,7 +283,6 @@ class Db_SQL {
         if ($this->limit) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        self::logSql($sql);
         return $sql;
     }
 
