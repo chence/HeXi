@@ -42,7 +42,31 @@ class HeXi {
      * 运行程序
      */
     public function run() {
-        $this->router->dispatch();
+        $res = $this->router->dispatch();
+        #返回错误就不返回了
+        if ($res === false || $res === null) {
+            exit;
+        }
+        #返回true就认为已经设置好了Response类
+        if ($res === true) {
+            Response::instance()->send();
+            exit;
+        }
+        #可以当作字符串就设置为内容返回
+        if (is_string($res) || is_int($res) || is_float($res)) {
+            Response::instance()->content($res)->send();
+            exit;
+        }
+        #如果是资源类型，抛出错误，无法处理
+        if (is_resource($res)) {
+            Error::stop('Unknown Return Data Type to send', 500);
+            exit;
+        }
+        #其他的类型，当作json返回
+        $response              = Response::instance();
+        $response->contentType = 'application/json';
+        $response->content     = json_encode($res);
+        $response->send();
     }
 
     //-----------------------------------
@@ -111,6 +135,16 @@ class HeXi {
             self::$objects[$hash] = !$key ? new $className() : new $className($key);
         }
         return self::$objects[$hash];
+    }
+
+    /**
+     * 销毁一个对象
+     * @param string      $className
+     * @param null|string $key
+     */
+    public static function destroy($className, $key = null) {
+        $hash = $className . ':' . $key;
+        unset(self::$objects[$hash]);
     }
 
 }

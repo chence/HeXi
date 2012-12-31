@@ -112,7 +112,7 @@ class Response {
         $this->status      = 200;
         $this->contentType = 'text/html';
         $this->charset     = 'UTF-8';
-        $this->content     = '';
+        $this->content     = false;
         #默认头信息
         $this->header = array(
             'X-Powered-By' => 'HeXi 2.0 alpha',

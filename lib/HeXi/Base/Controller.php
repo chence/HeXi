@@ -8,6 +8,11 @@
  */
 class Base_Controller extends Base_Class {
 
+    /**
+     * 魔术方法获取对象
+     * @param string $key
+     * @return Input|null|object|Request|Response
+     */
     public function __get($key) {
         switch ($key) {
             case 'input':
